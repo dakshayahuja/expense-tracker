@@ -75,7 +75,14 @@
       <!-- 2. Budget vs Actual -->
       <section class="card">
         <h2>Budget vs Actual</h2>
-        <div id="budget-bars"></div>
+        <div id="budget-bars">
+          <div class="sk-budget-row"></div>
+          <div class="sk-budget-row"></div>
+          <div class="sk-budget-row"></div>
+          <div class="sk-budget-row"></div>
+          <div class="sk-budget-row"></div>
+          <div class="sk-budget-row"></div>
+        </div>
       </section>
 
       <!-- 3 + 4. Charts row -->
@@ -83,6 +90,7 @@
         <section class="card chart-card">
           <h2>Spend Breakdown</h2>
           <div class="chart-wrap">
+            <div class="sk-chart sk-donut"></div>
             <canvas id="donut-chart"></canvas>
           </div>
         </section>
@@ -91,6 +99,7 @@
           <h2>Wealth-building vs Lifestyle</h2>
           <div class="split-legend" id="split-legend"></div>
           <div class="chart-wrap">
+            <div class="sk-chart"></div>
             <canvas id="split-chart"></canvas>
           </div>
         </section>
@@ -100,6 +109,7 @@
       <section class="card">
         <h2>6-Month Category Trends</h2>
         <div class="trend-wrap">
+          <div class="sk-chart sk-trend"></div>
           <canvas id="trend-chart"></canvas>
         </div>
       </section>

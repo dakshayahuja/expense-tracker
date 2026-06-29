@@ -3,6 +3,20 @@ const API = "";  // same origin
 const fmt = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
 const formatINR = (n) => fmt.format(n);
 
+let _pendingDelBtn = null;
+let _pendingDelTimer = null;
+function clearPendingDel() {
+  if (_pendingDelBtn) {
+    _pendingDelBtn.dataset.confirm = "";
+    _pendingDelBtn.textContent = "Del";
+    _pendingDelBtn.style.borderColor = "";
+    _pendingDelBtn.style.color = "";
+    _pendingDelBtn = null;
+  }
+  clearTimeout(_pendingDelTimer);
+  _pendingDelTimer = null;
+}
+
 // ── State ─────────────────────────────────────────
 let categories = [];
 let currentMonth = (() => {
@@ -187,20 +201,16 @@ function bindFilters() {
 // ── Delete ────────────────────────────────────────
 function deleteTxn(id, btn) {
   if (btn.dataset.confirm !== "1") {
+    clearPendingDel();
     btn.dataset.confirm = "1";
     btn.textContent = "Sure?";
     btn.style.borderColor = "var(--red)";
     btn.style.color = "var(--red)";
-    setTimeout(() => {
-      if (btn.dataset.confirm === "1") {
-        btn.dataset.confirm = "";
-        btn.textContent = "Del";
-        btn.style.borderColor = "";
-        btn.style.color = "";
-      }
-    }, 3000);
+    _pendingDelBtn = btn;
+    _pendingDelTimer = setTimeout(clearPendingDel, 3000);
     return;
   }
+  clearPendingDel();
   const row = btn.closest("tr");
   if (row) row.remove();
   fetch(`${API}/api/transactions/${id}`, { method: "DELETE" })

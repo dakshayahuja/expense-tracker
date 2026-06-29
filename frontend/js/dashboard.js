@@ -5,6 +5,20 @@ const formatINR = (n) => fmt.format(n);
 const formatDate = (d) => { const [y,m,dd] = d.split("-"); return `${dd}/${m}/${y.slice(2)}`; };
 const escHtml = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 
+let _pendingDelBtn = null;
+let _pendingDelTimer = null;
+function clearPendingDel() {
+  if (_pendingDelBtn) {
+    _pendingDelBtn.dataset.confirm = "";
+    _pendingDelBtn.textContent = "Del";
+    _pendingDelBtn.style.borderColor = "";
+    _pendingDelBtn.style.color = "";
+    _pendingDelBtn = null;
+  }
+  clearTimeout(_pendingDelTimer);
+  _pendingDelTimer = null;
+}
+
 // ── Palette — read live from CSS custom properties ─
 function getCSSVar(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -170,6 +184,14 @@ function renderHeadlineCards(s) {
 }
 
 // ── 2. Budget vs Actual bars ──────────────────────
+function removeSkeleton(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (canvas) {
+    canvas.closest(".chart-wrap, .trend-wrap")?.querySelectorAll(".sk-chart").forEach(el => el.remove());
+    canvas.classList.add("chart-ready");
+  }
+}
+
 function renderBudgetBars(cats) {
   const container = document.getElementById("budget-bars");
   container.innerHTML = cats.map(cat => {
@@ -211,6 +233,7 @@ function renderDonut(cats) {
   const labels = data.map(c => c.name);
   const values = data.map(c => c.actual);
 
+  removeSkeleton("donut-chart");
   if (donutChart) donutChart.destroy();
 
   const ctx = document.getElementById("donut-chart").getContext("2d");
@@ -267,6 +290,7 @@ function renderSplit(cats) {
   const labels = ["Wealth-building", "Lifestyle"];
   const values = [wealthTotal, lifeTotal];
 
+  removeSkeleton("split-chart");
   if (splitChart) splitChart.destroy();
 
   const ctx = document.getElementById("split-chart").getContext("2d");
@@ -341,6 +365,7 @@ function renderTrends(trends) {
     borderWidth: 2,
   }));
 
+  removeSkeleton("trend-chart");
   if (trendChart) trendChart.destroy();
 
   const ctx = document.getElementById("trend-chart").getContext("2d");
@@ -454,20 +479,16 @@ function goTxnPage(page) {
 // ── Edit + Delete ─────────────────────────────────
 function deleteTxn(id, btn) {
   if (btn.dataset.confirm !== "1") {
+    clearPendingDel();
     btn.dataset.confirm = "1";
     btn.textContent = "Sure?";
     btn.style.borderColor = "var(--red)";
     btn.style.color = "var(--red)";
-    setTimeout(() => {
-      if (btn.dataset.confirm === "1") {
-        btn.dataset.confirm = "";
-        btn.textContent = "Del";
-        btn.style.borderColor = "";
-        btn.style.color = "";
-      }
-    }, 3000);
+    _pendingDelBtn = btn;
+    _pendingDelTimer = setTimeout(clearPendingDel, 3000);
     return;
   }
+  clearPendingDel();
   const row = btn.closest("tr");
   if (row) row.remove();
   fetch(`${API}/api/transactions/${id}`, { method: "DELETE" })

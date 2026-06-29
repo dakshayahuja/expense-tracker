@@ -24,6 +24,38 @@
   gap: .875rem;
 }
 
+/* ── Skeleton loaders ────────────────────────────── */
+@keyframes sk-shimmer {
+  from { background-position: -600px 0; }
+  to   { background-position: 600px 0; }
+}
+.sk-budget-row {
+  height: 2.2rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+  background-size: 600px 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+  margin-bottom: .65rem;
+}
+.sk-budget-row:last-child { margin-bottom: 0; }
+.sk-chart {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+  background-size: 600px 100%;
+  animation: sk-shimmer 1.4s ease-in-out infinite;
+  z-index: 1;
+}
+.sk-donut {
+  border-radius: 50%;
+  inset: 10%;
+}
+.sk-trend { border-radius: var(--radius-sm); }
+.chart-wrap { position: relative; }
+.trend-wrap { position: relative; }
+canvas.chart-ready { position: relative; z-index: 2; }
+
 @keyframes hcard-in {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
