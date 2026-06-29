@@ -82,11 +82,14 @@ function bindControls() {
 
 // ── Main load ─────────────────────────────────────
 async function loadDashboard() {
+  document.querySelectorAll(".hcard").forEach(c => c.classList.add("loading"));
+
   const [summary, trends] = await Promise.all([
     fetch(`${API}/api/summary?month=${currentMonth}`).then(r => r.json()),
     fetch(`${API}/api/trends?months=6`).then(r => r.json()),
   ]);
 
+  document.querySelectorAll(".hcard").forEach(c => c.classList.remove("loading"));
   renderHeadlineCards(summary);
   renderBudgetBars(summary.categories);
   renderDonut(summary.categories);

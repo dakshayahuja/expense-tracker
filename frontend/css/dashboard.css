@@ -28,6 +28,21 @@
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes shimmer {
+  from { background-position: -400px 0; }
+  to   { background-position: 400px 0; }
+}
+.hcard.loading .hcard-value,
+.hcard.loading .hcard-sub {
+  color: transparent;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--bg4) 25%, var(--bg3) 50%, var(--bg4) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+  user-select: none;
+}
+.hcard.loading .hcard-value { min-width: 120px; min-height: 1.75rem; display: inline-block; }
+.hcard.loading .hcard-sub   { min-width: 70px;  min-height: .85rem;  display: inline-block; }
 @media (prefers-reduced-motion: reduce) {
   .hcard { animation: none !important; }
 }
