@@ -42,6 +42,7 @@
 | Investments/SIP | 10,000 | investment | Mutual funds via Groww/Zerodha |
 | Emergency Fund | 10,000 | investment | AU Bank |
 | Stocks/IPO | 3,000 | investment | Yes Bank account |
+| Credit Card Payment | 0 | expense | Transfer, not real spend — budget ₹0 |
 | **Total tracked** | **87,000** | | |
 
 ### Savings rate formula
@@ -461,22 +462,22 @@ Pure Python — no HTTP, no database, no pdfplumber I/O. Uses stub classes (`_Ta
 - [x] Optimisation suggestion panel — top 2 over-budget categories with rupee gap
 - [x] Income baseline: ₹1,07,396 (₹1,08,896 gross − ₹1,500 insurance at source)
 
-### Phase 4 — Deploy to Vercel + Neon
+### Phase 4 — Deploy to Vercel + Neon ✅
 
 - [x] `vercel.json` configured (Python serverless + static CDN routing, 60MB Lambda limit)
-- [x] CORS locked via `ALLOWED_ORIGIN` env var (wildcard for local dev, domain-restricted in prod)
+- [x] CORS locked via `ALLOWED_ORIGIN` env var (comma-separated, wildcard for local dev, domain-restricted in prod)
 - [x] `StaticFiles` mount disabled on Vercel (`VERCEL` env var check) — CDN serves frontend
 - [x] `GET /api/health` endpoint added for uptime checks
-- [ ] Neon account created, project + database set up
-- [ ] Neon connection string added to Vercel env vars
-- [ ] `ALLOWED_ORIGIN` set to production domain in Vercel env vars
-- [ ] Vercel project created, linked to repo
-- [ ] First deploy successful
-- [ ] Alembic migrations run against Neon DB
-- [ ] Seed categories on Neon DB
-- [ ] GoDaddy domain pointed to Vercel (CNAME)
-- [ ] Custom domain verified in Vercel dashboard
-- [ ] End-to-end test: add expense via web → appears on dashboard
+- [x] Neon account created, project + database set up (ap-southeast-1)
+- [x] Neon connection string (pooler URL) added to Vercel env vars
+- [x] `ALLOWED_ORIGIN` set to production domains in Vercel env vars
+- [x] Vercel project created, linked to repo
+- [x] First deploy successful
+- [x] Alembic migrations run against Neon DB
+- [x] Seed categories on Neon DB (11 categories including Credit Card Payment)
+- [x] GoDaddy CNAME + TXT records added for `expenses.dakshayahuja.in`
+- [x] Custom domain verified in Vercel dashboard
+- [x] End-to-end test: **live at https://expenses.dakshayahuja.in**
 
 ### Phase 5 — Telegram bot
 
@@ -730,7 +731,7 @@ See `.env.example` for template.
 | 5 | Neon free tier connection limit | Monitor | 10 concurrent connections on free tier. `pool_pre_ping=True` handles stale connections. Add `pool_size=1` if hitting limits. |
 | 6 | Chart.js loaded from CDN | Acceptable | Pin version `4.4.4`. Consider vendoring if offline use needed. |
 | 7 | Transport category: car repayment flexibility | Accepted | Brief says Rs 10k-20k flexible. Budgeted at Rs 24k (Rs 9k fuel + Rs 15k max). No special handling needed. |
-| 8 | No pagination on transaction list | Deferred | Fine for personal use (few hundred rows/month). Add `limit`/`offset` to `/api/transactions` if needed. |
+| 8 | ~~No pagination on transaction list~~ | **Done** | Client-side pagination (10/page) on both dashboard and expenses page. |
 
 ---
 
@@ -744,3 +745,4 @@ Track what was built in each Claude Code session.
 | 2026-06-28 | Phase 2 complete: Full dashboard — headline cards, budget bars, donut chart, split chart, 6-month trend line, transactions table |
 | 2026-06-29 | Phase 3 complete: Single dark theme, Inter font + optical letterforms, staggered card animations, coloured top stripes via inset box-shadow, 10px glowing budget bars, dashed import zone, section accent strips. CSV export/import, PDF bank statement import (AU Bank / Yes Bank / HDFC), bulk insert, rollover banner, optimisation suggestions, income baseline ₹1,07,396 constant. 149 tests passing. |
 | 2026-06-29 | Test fixes: removed stale date-aware income baseline tests (test_income_baseline_july_2026, test_income_baseline_post_july) — replaced with test_income_baseline_constant_any_month. README rewritten with UI design system + test suite documentation. Phases reordered: Phase 4 = Vercel deploy, Phase 5 = Telegram. |
+| 2026-06-30 | Phase 4 complete: Deployed to Vercel + Neon Postgres. Live at https://expenses.dakshayahuja.in. Custom domain via GoDaddy CNAME. Import UX overhaul: editable descriptions, row skip toggle, coloured Cancel/Import buttons, actions bar at bottom. SVG favicon. Client-side pagination (10/page). CORS supports comma-separated origins. Credit Card Payment category added. |
