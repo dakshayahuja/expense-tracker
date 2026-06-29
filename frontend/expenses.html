@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Log Expense - Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Expense Tracker</h1>
+      <nav class="nav">
+        <a href="/" class="nav-link">Dashboard</a>
+        <a href="/expenses.html" class="nav-link active">Log Expense</a>
+      </nav>
+    </header>
+
+    <main class="main">
+      <!-- Add Transaction Form -->
+      <section class="card">
+        <h2>Add Transaction</h2>
+        <form id="txn-form" class="form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="amount">Amount (Rs)</label>
+              <input type="number" id="amount" name="amount" placeholder="0.00" min="0.01" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="type">Type</label>
+              <select id="type" name="type" required>
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+                <option value="investment">Investment</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="category">Category</label>
+              <select id="category" name="category" required>
+                <option value="">Loading...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="subcategory">Subcategory (optional)</label>
+              <input type="text" id="subcategory" name="subcategory" placeholder="e.g. Dining out">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="description">Description</label>
+              <input type="text" id="description" name="description" placeholder="e.g. Lunch at cafe">
+            </div>
+            <div class="form-group">
+              <label for="txn_date">Date</label>
+              <input type="date" id="txn_date" name="txn_date" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="account">Account (optional)</label>
+              <select id="account" name="account">
+                <option value="">-- None --</option>
+                <option value="HDFC">HDFC</option>
+                <option value="AU Bank">AU Bank</option>
+                <option value="Yes Bank">Yes Bank</option>
+                <option value="Cash">Cash</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Add Transaction</button>
+          <p id="form-status" class="form-status"></p>
+        </form>
+      </section>
+
+      <!-- Recent Transactions -->
+      <section class="card">
+        <div class="section-header">
+          <h2>Recent Transactions</h2>
+          <div class="filters">
+            <input type="month" id="filter-month" class="filter-input">
+            <select id="filter-type" class="filter-input">
+              <option value="">All types</option>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+              <option value="investment">Investment</option>
+            </select>
+            <button class="btn btn-secondary" id="export-btn" style="font-size:.82rem;padding:.4rem .75rem">Export CSV</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="txn-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Source</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="txn-tbody">
+              <tr><td colspan="7" class="loading">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="txn-pagination"></div>
+      </section>
+
+      <!-- Statement Import -->
+      <section class="card">
+        <h2>Import Transactions</h2>
+        <div class="import-zone">
+          <select id="import-bank" class="filter-input">
+            <option value="">Select bank / format…</option>
+            <option value="au">AU Bank PDF</option>
+            <option value="yes">Yes Bank PDF</option>
+            <option value="hdfc">HDFC PDF</option>
+            <option value="csv">CSV export</option>
+          </select>
+          <input type="file" id="import-file" accept=".pdf,.csv" style="display:none">
+          <button class="btn btn-secondary" id="import-pick-btn">Upload statement</button>
+        </div>
+        <div id="import-preview" class="hidden">
+          <div class="table-wrap">
+            <table class="txn-table">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Description</th><th>Type</th>
+                  <th>Category</th><th>Amount</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="import-tbody"></tbody>
+            </table>
+          </div>
+          <div class="import-actions">
+            <span class="import-count" id="import-count"></span>
+            <div class="import-btns">
+              <button class="btn btn-cancel" id="import-cancel-btn">Cancel</button>
+              <button class="btn btn-confirm" id="import-confirm-btn">Import all</button>
+            </div>
+          </div>
+        </div>
+        <p id="import-status" class="form-status" style="margin-top:.75rem"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-box">
+      <h3>Edit Transaction</h3>
+      <form id="edit-form" class="form">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label>Amount (Rs)</label>
+          <input type="number" id="edit-amount" min="0.01" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="edit-category"></select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="edit-description">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="edit-date" required>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" id="modal-close" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

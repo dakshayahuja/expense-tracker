@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <h1>Expense Tracker</h1>
+      <nav class="nav">
+        <a href="/" class="nav-link active">Dashboard</a>
+        <a href="/expenses.html" class="nav-link">Log Expense</a>
+      </nav>
+    </header>
+
+    <main class="main">
+
+      <!-- Month selector -->
+      <div class="dash-controls">
+        <div class="month-nav">
+          <button class="btn btn-secondary month-btn" id="prev-month">&#8592;</button>
+          <input type="month" id="dash-month" class="filter-input month-input">
+          <button class="btn btn-secondary month-btn" id="next-month">&#8594;</button>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-secondary" id="export-btn">Export CSV</button>
+          <button class="btn btn-secondary" id="refresh-btn">Refresh</button>
+        </div>
+      </div>
+
+      <!-- Rollover banner (hidden by default) -->
+      <div id="rollover-banner" class="rollover-banner hidden">
+        <span class="rb-icon">&#9888;</span>
+        <div class="rb-body">
+          <strong id="rb-title"></strong>
+          <ul id="rb-list"></ul>
+        </div>
+        <button class="rb-dismiss" id="rb-dismiss" title="Dismiss">&#10005;</button>
+      </div>
+
+      <!-- 1. Headline cards -->
+      <section class="headline-cards">
+        <div class="hcard">
+          <div class="hcard-label">Total Inflow</div>
+          <div class="hcard-value" id="hc-income">--</div>
+        </div>
+        <div class="hcard">
+          <div class="hcard-label">Total Outflow</div>
+          <div class="hcard-value" id="hc-expense">--</div>
+        </div>
+        <div class="hcard">
+          <div class="hcard-label">Investments</div>
+          <div class="hcard-value hcard-invest" id="hc-invest">--</div>
+        </div>
+        <div class="hcard">
+          <div class="hcard-label">Net Saved</div>
+          <div class="hcard-value" id="hc-net">--</div>
+        </div>
+        <div class="hcard" id="hc-savings-card">
+          <div class="hcard-label">Savings Rate</div>
+          <div class="hcard-value" id="hc-savings">--</div>
+          <div class="hcard-sub">Target: 21.5%+</div>
+        </div>
+      </section>
+
+      <!-- 2. Budget vs Actual -->
+      <section class="card">
+        <h2>Budget vs Actual</h2>
+        <div id="budget-bars"></div>
+      </section>
+
+      <!-- 3 + 4. Charts row -->
+      <div class="charts-row">
+        <section class="card chart-card">
+          <h2>Spend Breakdown</h2>
+          <div class="chart-wrap">
+            <canvas id="donut-chart"></canvas>
+          </div>
+        </section>
+
+        <section class="card chart-card">
+          <h2>Wealth-building vs Lifestyle</h2>
+          <div class="split-legend" id="split-legend"></div>
+          <div class="chart-wrap">
+            <canvas id="split-chart"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <!-- 5. Trend line -->
+      <section class="card">
+        <h2>6-Month Category Trends</h2>
+        <div class="trend-wrap">
+          <canvas id="trend-chart"></canvas>
+        </div>
+      </section>
+
+      <!-- 6. Optimisation suggestions -->
+      <section class="card" id="suggestions-card" style="display:none">
+        <h2>Optimisation Opportunities</h2>
+        <div class="suggestions-grid" id="suggestions-grid"></div>
+      </section>
+
+      <!-- 7. Recent transactions -->
+      <section class="card">
+        <div class="section-header">
+          <h2>Recent Transactions</h2>
+          <div class="filters">
+            <select id="filter-type" class="filter-input">
+              <option value="">All types</option>
+              <option value="expense">Expense</option>
+              <option value="income">Income</option>
+              <option value="investment">Investment</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="txn-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Source</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="txn-tbody">
+              <tr><td colspan="7" class="loading">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" id="txn-pagination"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-box">
+      <h3>Edit Transaction</h3>
+      <form id="edit-form" class="form">
+        <input type="hidden" id="edit-id">
+        <div class="form-group">
+          <label>Amount (Rs)</label>
+          <input type="number" id="edit-amount" min="0.01" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="edit-category"></select>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <input type="text" id="edit-description">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="edit-date" required>
+        </div>
+        <div class="form-row">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" id="modal-close" class="btn btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>
