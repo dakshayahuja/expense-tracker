@@ -68,7 +68,10 @@ function bindControls() {
     loadDashboard();
   });
 
-  document.getElementById("refresh-btn").addEventListener("click", loadDashboard);
+  document.getElementById("refresh-btn").addEventListener("click", () => {
+    document.querySelectorAll(".hcard").forEach(c => c.classList.add("loading"));
+    loadDashboard();
+  });
   document.getElementById("filter-type").addEventListener("change", () => loadTransactions());
 
   document.getElementById("export-btn").addEventListener("click", () => {
@@ -82,8 +85,6 @@ function bindControls() {
 
 // ── Main load ─────────────────────────────────────
 async function loadDashboard() {
-  document.querySelectorAll(".hcard").forEach(c => c.classList.add("loading"));
-
   const [summary, trends] = await Promise.all([
     fetch(`${API}/api/summary?month=${currentMonth}`).then(r => r.json()),
     fetch(`${API}/api/trends?months=6`).then(r => r.json()),
@@ -415,7 +416,7 @@ function renderTransactions() {
       <td><span class="badge badge-${t.source}">${t.source}</span></td>
       <td class="actions">
         <button class="btn btn-edit" onclick="openEdit(${t.id})">Edit</button>
-        <button class="btn btn-danger" onclick="deleteTxn(${t.id})">Del</button>
+        <button class="btn btn-danger" onclick="deleteTxn(${t.id}, this)">Del</button>
       </td>
     </tr>
   `).join("");
@@ -451,10 +452,26 @@ function goTxnPage(page) {
 }
 
 // ── Edit + Delete ─────────────────────────────────
-async function deleteTxn(id) {
-  if (!confirm(`Delete transaction #${id}?`)) return;
-  const res = await fetch(`${API}/api/transactions/${id}`, { method: "DELETE" });
-  if (res.ok || res.status === 204) loadDashboard();
+function deleteTxn(id, btn) {
+  if (btn.dataset.confirm !== "1") {
+    btn.dataset.confirm = "1";
+    btn.textContent = "Sure?";
+    btn.style.borderColor = "var(--red)";
+    btn.style.color = "var(--red)";
+    setTimeout(() => {
+      if (btn.dataset.confirm === "1") {
+        btn.dataset.confirm = "";
+        btn.textContent = "Del";
+        btn.style.borderColor = "";
+        btn.style.color = "";
+      }
+    }, 3000);
+    return;
+  }
+  const row = btn.closest("tr");
+  if (row) row.remove();
+  fetch(`${API}/api/transactions/${id}`, { method: "DELETE" })
+    .then(res => { if (res.ok || res.status === 204) loadDashboard(); });
 }
 
 function populateCategorySelect(id) {
